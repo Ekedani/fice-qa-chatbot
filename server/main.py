@@ -31,7 +31,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception: %s", exc)
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal Server Error", "details": "An unexpected error occurred. Please try again later."}
+        content={
+            "error": "Internal Server Error",
+            "details": "An unexpected error occurred. Please try again later."
+        }
+    )
+
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(chat_request: ChatRequest):
