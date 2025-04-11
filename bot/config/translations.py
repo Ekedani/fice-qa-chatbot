@@ -1,16 +1,13 @@
-import gettext
-import os
+class Translations:
+    _messages = {
+        'uk': {
+            'start': 'Вітаю! Я ваш бот. Надішліть мені повідомлення, і я відповім використовуючи RAG систему.',
+            'help': 'Просто надішліть повідомлення. Використайте /reset щоб очистити історію розмови.',
+            'reset': 'Історію розмови очищено.',
+            'error': 'Вибачте, сталася помилка під час обробки вашого запиту.'
+        }
+    }
 
-LOCALE_DIR = os.path.join(os.path.dirname(__file__), "locales")
-LANGUAGE = "uk"
-
-translation = gettext.translation(
-    domain="messages",
-    localedir=LOCALE_DIR,
-    languages=[LANGUAGE],
-    fallback=True
-)
-_ = translation.gettext
-
-if __name__ == "__main__":
-    print(_("Welcome to our application!"))
+    @classmethod
+    def get(cls, key: str, lang: str = 'uk') -> str:
+        return cls._messages.get(lang, {}).get(key, key)

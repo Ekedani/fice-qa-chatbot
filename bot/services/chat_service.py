@@ -22,12 +22,17 @@ class ChatService:
         Raises:
             Exception: If the HTTP request fails.
         """
-        payload = {"conversation": conversation}
-        try:
-            response = requests.post(self.api_url, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("answer", "Answer not received")
-        except Exception as e:
-            logger.exception("Error querying chat API: %s", e)
-            raise e
+
+        def query_chat(self, conversation: list) -> str:
+            payload = {"conversation": conversation}
+            try:
+                response = requests.post(self.api_url, json=payload, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                return data.get("answer", "Answer not received")
+            except requests.Timeout:
+                logger.error("Request to chat API timed out")
+                raise Exception("Request timeout")
+            except Exception as e:
+                logger.exception("Error querying chat API: %s", e)
+                raise

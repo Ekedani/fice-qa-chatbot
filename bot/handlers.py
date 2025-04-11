@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 
 from services.chat_service import ChatService
 from services.coversation_service import ConversationService
+from config.translations import Translations as t
 
 logger = logging.getLogger(__name__)
 conversation_service = ConversationService()
@@ -21,7 +22,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     chat_id = update.effective_chat.id
     conversation_service.reset_conversation(chat_id)
-    await update.message.reply_text("Hello! I am your bot. Send me a message and I'll reply using our RAG system.")
+    await update.message.reply_text(t.get('start'))
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -33,7 +34,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         update (Update): Incoming Telegram update.
         context (ContextTypes.DEFAULT_TYPE): Callback context.
     """
-    await update.message.reply_text("Simply send a message. Use /reset to clear the conversation history.")
+    await update.message.reply_text(t.get('help'))
 
 
 async def reset_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -47,7 +48,7 @@ async def reset_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     """
     chat_id = update.effective_chat.id
     conversation_service.reset_conversation(chat_id)
-    await update.message.reply_text("Conversation history has been cleared.")
+    await update.message.reply_text(t.get('reset'))
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -62,15 +63,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     chat_id = update.effective_chat.id
     user_text = update.message.text.strip()
 
-    conversation_service.append_message(chat_id, {"role": "user", "content": user_text})
-    conversation = conversation_service.get_conversation(chat_id)
-
     try:
+        conversation_service.append_message(chat_id, {"role": "user", "content": user_text})
+        conversation = conversation_service.get_conversation(chat_id)
         answer = chat_service.query_chat(conversation)
+        conversation_service.append_message(chat_id, {"role": "assistant", "content": answer})
+        await update.message.reply_text(answer)
     except Exception as e:
-        logger.exception("Error querying chat API: %s", e)
+        logger.exception("Error processing message: %s", e)
         await update.message.reply_text("Sorry, an error occurred while processing your request.")
-        return
-
-    conversation_service.append_message(chat_id, {"role": "assistant", "content": answer})
-    await update.message.reply_text(answer)
