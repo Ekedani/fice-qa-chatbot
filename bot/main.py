@@ -14,10 +14,6 @@ def main() -> None:
     """
     Starts the Telegram bot using long polling.
     """
-    if not settings.TELEGRAM_BOT_TOKEN:
-        logger.error("FICE_QA_TELEGRAM_BOT_TOKEN is not set in the environment variables.")
-        return
-
     application = Application.builder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))

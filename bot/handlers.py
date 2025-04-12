@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from services.chat_service import ChatService
-from services.coversation_service import ConversationService
+from services.conversation_service import ConversationService
 from config.translations import Translations as t
 
 logger = logging.getLogger(__name__)
