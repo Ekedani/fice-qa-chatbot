@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
 from config.settings import DATABASE_URL
-from config.translations import Translations as t
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +30,12 @@ Base.metadata.create_all(bind=engine)
 
 
 class ConversationService:
-    def __init__(self):
+    def __init__(self, message_limit: int = 10):
         """
         Initializes the service with a _SessionLocal factory.
         """
         self._session_local = _SessionLocal
+        self._message_limit = message_limit
 
     @contextmanager
     def session_scope(self) -> Session:
@@ -67,7 +67,7 @@ class ConversationService:
                 session.query(Conversation).filter(Conversation.chat_id == chat_id).delete()
         except Exception as e:
             logger.exception(
-                t.get('error_reset_conversation', 'uk') % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to reset conversation: ' % {'chat_id': chat_id, 'error': str(e)}
             )
 
     def append_message(self, chat_id: int, message: Dict[str, Any]) -> None:
@@ -80,6 +80,20 @@ class ConversationService:
         """
         try:
             with self.session_scope() as session:
+                count = session.query(Conversation).filter(
+                    Conversation.chat_id == chat_id
+                ).count()
+
+                if count >= self._message_limit:
+                    oldest_messages = session.query(Conversation).filter(
+                        Conversation.chat_id == chat_id
+                    ).order_by(
+                        Conversation.timestamp.asc()
+                    ).limit(count - self._message_limit + 1).all()
+
+                    for msg in oldest_messages:
+                        session.delete(msg)
+
                 record = Conversation(
                     chat_id=chat_id,
                     role=message.get("role", "unknown"),
@@ -88,7 +102,7 @@ class ConversationService:
                 session.add(record)
         except Exception as e:
             logger.exception(
-                t.get('error_append_message', 'uk') % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to append message: ' % {'chat_id': chat_id, 'error': str(e)}
             )
 
     def get_conversation(self, chat_id: int) -> List[Dict[str, Any]]:
@@ -111,6 +125,6 @@ class ConversationService:
                 return conversation
         except Exception as e:
             logger.exception(
-                t.get('error_get_conversation', 'uk') % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to get conversation: ' % {'chat_id': chat_id, 'error': str(e)}
             )
             return []

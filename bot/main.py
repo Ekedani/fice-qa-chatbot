@@ -1,5 +1,6 @@
 import logging
 from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ChatAction
 from aiogram.filters import Command
 
 from config.settings import TELEGRAM_BOT_TOKEN
@@ -8,7 +9,7 @@ from services.conversation_service import ConversationService
 from config.translations import Translations as t
 
 logger = logging.getLogger(__name__)
-conversation_service = ConversationService()
+conversation_service = ConversationService(message_limit=4)
 chat_service = ChatService()
 
 dp = Dispatcher()
@@ -57,8 +58,11 @@ async def handle_message(message: types.Message) -> None:
     try:
         conversation_service.append_message(chat_id, {"role": "user", "content": user_text})
         conversation = conversation_service.get_conversation(chat_id)
+
+        await message.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         answer = chat_service.query_chat(conversation)
         conversation_service.append_message(chat_id, {"role": "system", "content": answer})
+
         await message.answer(answer)
     except Exception as e:
         logger.exception("Error processing message: %s", e)
