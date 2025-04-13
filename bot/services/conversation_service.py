@@ -67,7 +67,7 @@ class ConversationService:
                 session.query(Conversation).filter(Conversation.chat_id == chat_id).delete()
         except Exception as e:
             logger.exception(
-                'Failed to reset conversation: ' % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to reset conversation: chat_id=%s, error=%s', chat_id, str(e)
             )
 
     def append_message(self, chat_id: int, message: Dict[str, Any]) -> None:
@@ -102,7 +102,7 @@ class ConversationService:
                 session.add(record)
         except Exception as e:
             logger.exception(
-                'Failed to append message: ' % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to append message for chat_id=%s with error=%s', chat_id, str(e)
             )
 
     def get_conversation(self, chat_id: int) -> List[Dict[str, Any]]:
@@ -125,6 +125,6 @@ class ConversationService:
                 return conversation
         except Exception as e:
             logger.exception(
-                'Failed to get conversation: ' % {'chat_id': chat_id, 'error': str(e)}
+                'Failed to get conversation: chat_id=%s, error=%s', chat_id, str(e)
             )
             return []
