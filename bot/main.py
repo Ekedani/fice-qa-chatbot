@@ -61,7 +61,7 @@ async def handle_message(message: types.Message) -> None:
 
         await message.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         answer = chat_service.query_chat(conversation)
-        conversation_service.append_message(chat_id, {"role": "system", "content": answer})
+        conversation_service.append_message(chat_id, {"role": "assistant", "content": answer})
 
         await message.answer(answer)
     except Exception as e:
