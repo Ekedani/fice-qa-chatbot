@@ -1,13 +1,14 @@
 import logging
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import uvicorn
 
 from models.chat_models import ChatRequest, ChatResponse
-from services.rag_pipeline import get_answer
+from services.deepseek_service import DeepSeekChatService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+chat_service = DeepSeekChatService()
 
 app = FastAPI(
     title="RAG Chatbot API",
@@ -61,11 +62,7 @@ async def chat_endpoint(chat_request: ChatRequest):
     Raises:
         HTTPException: If an error occurs in the RAG pipeline.
     """
-    try:
-        answer = get_answer(chat_request.conversation)
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"RAG pipeline error: {str(exc)}")
-
+    answer = await chat_service.get_answer(chat_request.conversation)
     return ChatResponse(answer=answer)
 
 
