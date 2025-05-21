@@ -6,10 +6,10 @@ from services.embeddings import get_embeddings
 
 @lru_cache
 def get_vectordb() -> Chroma:
-    s = get_settings()
+    settings = get_settings()
 
     return Chroma(
-        persist_directory=s.chroma_dir,
-        collection_name=s.chroma_collection,
+        persist_directory=settings.chroma_directory,
+        collection_name=settings.chroma_collection,
         embedding_function=get_embeddings(),
     )

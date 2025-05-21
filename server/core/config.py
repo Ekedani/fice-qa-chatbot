@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     api_key: str
     deepseek_api_key: str
-    chroma_dir: str
+    chroma_directory: str
     chroma_collection: str
     hf_model: str
 
