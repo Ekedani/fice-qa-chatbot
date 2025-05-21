@@ -7,7 +7,7 @@ from openai import AsyncOpenAI
 
 from config.settings import DEEPSEEK_API_URL, DEEPSEEK_API_KEY
 from models.chat_models import Message
-from chat_service import ChatService
+from .chat_service import ChatService
 from context_provider import get_context
 
 logger = logging.getLogger(__name__)
