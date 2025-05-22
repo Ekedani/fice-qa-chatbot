@@ -12,7 +12,6 @@ def _startup():
     from services.llm import get_llm
     get_vectordb()
     get_llm()
-    print(get_settings())
 
 
 if __name__ == "__main__":
