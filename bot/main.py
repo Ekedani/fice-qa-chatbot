@@ -48,25 +48,30 @@ async def reset_command(message: types.Message) -> None:
 
 @dp.message()
 async def handle_message(message: types.Message) -> None:
-    """
-    Handles incoming text messages.
-    Stores the user message, queries the chat API, stores the bot's reply, and sends the answer back.
-    """
     chat_id = message.chat.id
     user_text = message.text.strip()
+    loading_msg = None
 
     try:
+        loading_msg = await message.answer_animation(
+            animation="https://media1.tenor.com/m/uaLasm_ExBcAAAAd/a-parakeet-admiring-himself-parakeet.gif",
+            caption="Бот шукає інформацію. Будь ласка, очікуйте на відповідь."
+        )
+
         conversation_service.append_message(chat_id, {"role": "user", "content": user_text})
         conversation = conversation_service.get_conversation(chat_id)
-
         await message.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         answer = chat_service.query_chat(conversation)
         conversation_service.append_message(chat_id, {"role": "assistant", "content": answer})
-
         await message.answer(answer)
+
     except Exception as e:
         logger.exception("Error processing message: %s", e)
         await message.answer(t.get('error'))
+
+    finally:
+        if loading_msg:
+            await message.bot.delete_message(chat_id=chat_id, message_id=loading_msg.message_id)
 
 
 if __name__ == "__main__":
@@ -76,6 +81,7 @@ if __name__ == "__main__":
 
 
     async def main():
+        print("Bot is up and running")
         await dp.start_polling(bot)
 
 
