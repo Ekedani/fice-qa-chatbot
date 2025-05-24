@@ -4,11 +4,13 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.globals import set_debug
 
 from core.prompt import SYSTEM_PROMPT
 from services.llm import get_llm
 from services.vectorstore import get_vectordb
 
+set_debug(True)
 
 def get_qa_chain():
     llm = get_llm()
