@@ -19,9 +19,13 @@ async def chat_endpoint(
     user_question = req.conversation[-1].content.strip()
     history: List[Tuple[str, str]] = []
 
-    for i in range(0, len(req.conversation) - 1, 2):
-        if req.conversation[i].role == "user" and req.conversation[i + 1].role != "user":
-            history.append((req.conversation[i].content, req.conversation[i + 1].content))
+    last_user_msg = None
+    for msg in req.conversation[:-1]:
+        if msg.role == "user":
+            last_user_msg = msg.content
+        elif msg.role != "user" and last_user_msg:
+            history.append ((last_user_msg, msg.content))
+            last_user_msg = None
 
     result = qa_chain.invoke({
         "input": user_question,
