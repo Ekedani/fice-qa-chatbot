@@ -1,12 +1,13 @@
 import logging
 from aiogram import Bot, Dispatcher, types
-from aiogram.enums import ChatAction
+from aiogram.enums import ChatAction, ParseMode
 from aiogram.filters import Command
 
 from config.settings import TELEGRAM_BOT_TOKEN
 from services.chat_service import ChatService
 from services.conversation_service import ConversationService
 from config.translations import Translations as t
+from telegramify_markdown import markdownify
 
 logger = logging.getLogger(__name__)
 conversation_service = ConversationService(message_limit=4)
@@ -61,9 +62,10 @@ async def handle_message(message: types.Message) -> None:
         conversation_service.append_message(chat_id, {"role": "user", "content": user_text})
         conversation = conversation_service.get_conversation(chat_id)
         await message.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-        answer = chat_service.query_chat(conversation)
-        conversation_service.append_message(chat_id, {"role": "assistant", "content": answer})
-        await message.answer(answer)
+        raw_answer = chat_service.query_chat(conversation)
+        conversation_service.append_message(chat_id, {"role": "assistant", "content": raw_answer})
+        answer = markdownify(raw_answer)
+        await message.answer(answer, parse_mode=ParseMode.MARKDOWN_V2, disable_web_page_preview=True)
 
     except Exception as e:
         logger.exception("Error processing message: %s", e)
