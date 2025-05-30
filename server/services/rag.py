@@ -16,7 +16,7 @@ set_debug(True)
 def get_qa_chain():
     llm = get_llm()
     vectordb = get_vectordb()
-    retriever = vectordb.as_retriever()
+    retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
     history_prompt = ChatPromptTemplate.from_messages([
         ("system",
