@@ -9,6 +9,7 @@ from langchain.vectorstores import Chroma
 RAW_FILE = Path("data/raw_docs.jsonl")
 COLL_NAME = "fice_docs"
 PERSIST_DIR = "../chroma"
+BATCH_SIZE = 5000
 
 docs: list[Document] = []
 with RAW_FILE.open(encoding="utf-8") as fh:
@@ -29,7 +30,10 @@ vectordb = Chroma(
     embedding_function=emb,
 )
 
-vectordb.add_documents(chunks)
+for i in range(0, len(chunks), BATCH_SIZE):
+    batch = chunks[i:i + BATCH_SIZE]
+    vectordb.add_documents(batch)
+
 vectordb.persist()
 
 print(f"Додано {len(chunks)} чанків у Chroma «{COLL_NAME}» (директорія: {PERSIST_DIR})")

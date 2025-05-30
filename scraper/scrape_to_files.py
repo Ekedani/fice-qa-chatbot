@@ -2,7 +2,7 @@ import hashlib
 import json
 import tempfile
 from pathlib import Path
-from urllib.parse import urljoin, urldefrag
+from urllib.parse import urlparse, urljoin, urldefrag
 
 import scrapy
 import trafilatura
@@ -14,7 +14,6 @@ START_URLS = [
     "https://ist.kpi.ua/",
     "https://comsys.kpi.ua/",
     "https://ipi.kpi.ua/",
-    "https://pk.kpi.ua/",
     "https://telegra.ph/121-%D0%86nzhener%D1%96ya-programnogo-zabezpechennya-07-05",
     "https://telegra.ph/123-Kompyutern%D1%96-sistemi-ta-merezh%D1%96-07-07",
     "https://telegra.ph/126-%D0%86nformac%D1%96jn%D1%96-sistemi-ta-tehnolog%D1%96i-07-30-2",
@@ -23,14 +22,14 @@ START_URLS = [
 RAW_PATH = Path("data")
 RAW_PATH.mkdir(parents=True, exist_ok=True)
 OUT_FILE = RAW_PATH / "raw_docs.jsonl"
-MAX_DEPTH = 2
+MAX_DEPTH = 5
 FOLLOW_FILETYPES = (".html", ".php", ".pdf", "/")
 
+ALLOWED_DOMAINS = {urlparse(url).netloc for url in START_URLS}
 
 class ContentSpider(scrapy.Spider):
     name = "content"
     start_urls = START_URLS
-    allowed_domains = [url.split("/")[2] for url in START_URLS]
     custom_settings = {
         "DEPTH_LIMIT": MAX_DEPTH,
         "ROBOTSTXT_OBEY": False,
@@ -66,13 +65,15 @@ class ContentSpider(scrapy.Spider):
                 }
 
         for href in response.css("a::attr(href)").getall():
-            full = urljoin(url, href)
-            full, _ = urldefrag(full)
+            full_url = urljoin(url, href)
+            full_url, _ = urldefrag(full_url)
+
+            parsed = urlparse(full_url)
             if (
-                    full.startswith(tuple(self.start_urls))
-                    and full.lower().endswith(FOLLOW_FILETYPES)
+                    parsed.netloc in ALLOWED_DOMAINS
+                    and any(parsed.path.lower().endswith(ext) for ext in FOLLOW_FILETYPES)
             ):
-                yield response.follow(full, callback=self.parse)
+                yield response.follow(full_url, callback=self.parse)
 
     def parse_pdf(self, response):
         with tempfile.NamedTemporaryFile(suffix=".pdf") as tmp:
