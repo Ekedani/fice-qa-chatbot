@@ -14,7 +14,11 @@ START_URLS = [
     "https://ist.kpi.ua/",
     "https://comsys.kpi.ua/",
     "https://ipi.kpi.ua/",
-    "https://pk.kpi.ua/"
+    "https://pk.kpi.ua/",
+    "https://telegra.ph/121-%D0%86nzhener%D1%96ya-programnogo-zabezpechennya-07-05",
+    "https://telegra.ph/123-Kompyutern%D1%96-sistemi-ta-merezh%D1%96-07-07",
+    "https://telegra.ph/126-%D0%86nformac%D1%96jn%D1%96-sistemi-ta-tehnolog%D1%96i-07-30-2",
+    "https://teletype.in/@kpicampus/campus_guide"
 ]
 RAW_PATH = Path("data")
 RAW_PATH.mkdir(parents=True, exist_ok=True)
