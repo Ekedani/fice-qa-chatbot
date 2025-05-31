@@ -28,7 +28,7 @@ class ChatService:
             response = requests.post(
                 f'{self.api_url}/chat',
                 json={"conversation": conversation},
-                timeout=60
+                timeout=180
             )
             response.raise_for_status()
             return response.json()["answer"]
