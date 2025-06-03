@@ -16,7 +16,15 @@ set_debug(True)
 def get_qa_chain():
     llm = get_llm()
     vectordb = get_vectordb()
-    retriever = vectordb.as_retriever(search_kwargs={"k": 5})
+    retriever = vectordb.as_retriever(
+        search_type="mmr",
+        search_kwargs={
+            "fetch_k": 50,
+            "k": 5,
+            "lambda_mult": 0.3,
+            "score_threshold": 0.2
+        }
+    )
 
     history_prompt = ChatPromptTemplate.from_messages([
         ("system",
@@ -37,7 +45,8 @@ def get_qa_chain():
 
     doc_chain = create_stuff_documents_chain(llm,
                                              answer_prompt,
-                                             document_prompt=PromptTemplate.from_template("Source: {source}. Content:\n{page_content}"))
+                                             document_prompt=PromptTemplate.from_template(
+                                                 "Source: {source}. Content:\n{page_content}"))
     rag_chain = create_retrieval_chain(history_aware_retriever, doc_chain)
 
     return rag_chain
